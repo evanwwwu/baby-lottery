@@ -1,25 +1,25 @@
 FROM node:22-alpine AS builder
+LABEL "language"="nodejs"
+LABEL "framework"="vite"
 
 WORKDIR /app
 
-# Enable corepack for pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+COPY package.json package-lock.json ./
 
-# Copy package files first for better caching
-COPY package.json pnpm-lock.yaml* ./
+RUN npm install
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile || pnpm install
-
-# Copy source files
 COPY . .
 
-# Build the application
-RUN pnpm build
+RUN npm run build
 
-# Production stage
-FROM zeabur/caddy-static:latest
+FROM node:22-alpine
 
-COPY --from=builder /app/dist /usr/share/caddy
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
 
 EXPOSE 8080
+
+CMD ["npm", "start"]
