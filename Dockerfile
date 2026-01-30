@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -13,10 +13,6 @@ RUN pnpm install --frozen-lockfile || pnpm install
 
 # Copy source files
 COPY . .
-
-# Build-time environment variables (Zeabur will inject these)
-ARG GEMINI_API_KEY
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
 # Build the application
 RUN pnpm build
