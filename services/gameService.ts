@@ -41,11 +41,12 @@ export const getGameState = (): GameState => {
  * Prevents double voting by checking userId in transaction.
  */
 export const castVote = async (
-  name: string, 
-  choice: Gender, 
+  name: string,
+  choice: Gender,
   userId: string,
+  amount: number,
   photoURL?: string,
-  aiMessage?: string, 
+  email?: string,
   userComment?: string
 ): Promise<{success: boolean, message?: string, voteId?: string}> => {
   
@@ -82,9 +83,10 @@ export const castVote = async (
         name,
         choice,
         timestamp: Date.now(),
+        amount,
         userId,
         photoURL: photoURL || '',
-        aiMessage,
+        email: email || '',
         userComment
       };
 

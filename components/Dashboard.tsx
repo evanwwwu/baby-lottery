@@ -13,6 +13,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ gameState }) => {
   const girlCount = votes.filter(v => v.choice === Gender.GIRL).length;
   const totalVotes = votes.length;
 
+  // Calculate amounts
+  const boyAmount = votes.filter(v => v.choice === Gender.BOY).reduce((sum, v) => sum + (v.amount || 0), 0);
+  const girlAmount = votes.filter(v => v.choice === Gender.GIRL).reduce((sum, v) => sum + (v.amount || 0), 0);
+  const totalAmount = boyAmount + girlAmount;
+
   if (isRevealed && winner) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-in fade-in zoom-in duration-1000">
@@ -84,6 +89,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ gameState }) => {
          </div>
       </div>
 
+      {/* Amount Stats Section */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border-4 border-amber-100 mb-10">
+         <h3 className="font-heading font-bold text-xl text-slate-600 mb-4 text-center flex items-center justify-center gap-2">
+           <span>💰</span>
+           <span>下注金額統計</span>
+         </h3>
+         <div className="text-center text-slate-500 mb-4">
+           總金額：<span className="font-bold text-lg text-amber-600">${totalAmount.toLocaleString()} 元</span>
+         </div>
+         <div className="flex items-center justify-around">
+            <div className="text-center">
+               <div className="text-3xl md:text-4xl font-black text-blue-500 tabular-nums">
+                  ${boyAmount.toLocaleString()}
+               </div>
+               <div className="text-sm font-bold text-blue-400 mt-1">BOY 總金額</div>
+            </div>
+            <div className="text-slate-300 font-bold text-xl">VS</div>
+            <div className="text-center">
+               <div className="text-3xl md:text-4xl font-black text-pink-500 tabular-nums">
+                  ${girlAmount.toLocaleString()}
+               </div>
+               <div className="text-sm font-bold text-pink-400 mt-1">GIRL 總金額</div>
+            </div>
+         </div>
+         {/* Amount Progress Bar */}
+         <div className="mt-4 relative h-3 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
+            <div
+               className="h-full bg-blue-400 transition-all duration-1000 ease-out"
+               style={{ width: `${totalAmount ? (boyAmount / totalAmount) * 100 : 50}%` }}
+            />
+            <div
+               className="h-full bg-pink-400 transition-all duration-1000 ease-out"
+               style={{ width: `${totalAmount ? (girlAmount / totalAmount) * 100 : 50}%` }}
+            />
+         </div>
+      </div>
+
       {/* Message Cloud Section */}
       <div className="bg-white/60 backdrop-blur-md p-6 rounded-3xl border-4 border-white shadow-lg min-h-[300px]">
         <h3 className="font-heading font-bold text-xl text-slate-600 mb-6 text-center flex items-center justify-center gap-2">
@@ -121,6 +163,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ gameState }) => {
                   <div className="font-bold flex items-center justify-center text-sm mb-0.5">
                      <span>{vote.name}</span>
                   </div>
+                  {vote.amount > 0 && (
+                     <div className="text-xs text-center font-bold text-amber-600 mb-0.5">
+                        ${vote.amount.toLocaleString()}
+                     </div>
+                  )}
                   
                   {vote.userComment && (
                      <div className="text-xs text-center font-medium leading-relaxed opacity-90 break-words border-t border-current/10 pt-1 mt-1">

@@ -10,11 +10,42 @@ import { AdminPage } from './components/AdminPage';
 
 type View = 'vote' | 'dashboard' | 'admin';
 
+const isDev = import.meta.env.DEV;
+
+const PATH_TO_VIEW: Record<string, View> = {
+  '/': 'vote',
+  '/vote': 'vote',
+  '/dashboard': 'dashboard',
+  '/admin': 'admin',
+};
+
+const VIEW_TO_PATH: Record<View, string> = {
+  vote: '/vote',
+  dashboard: '/dashboard',
+  admin: '/admin',
+};
+
+function getViewFromPath(): View {
+  return PATH_TO_VIEW[window.location.pathname] || 'vote';
+}
+
 function App() {
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
-  const [currentView, setCurrentView] = useState<View>('vote');
+  const [currentView, setCurrentView] = useState<View>(getViewFromPath);
   const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+
+  // Sync URL → view on popstate (back/forward)
+  useEffect(() => {
+    const handlePopState = () => setCurrentView(getViewFromPath());
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (view: View) => {
+    setCurrentView(view);
+    window.history.pushState(null, '', VIEW_TO_PATH[view]);
+  };
 
   // Sync state using Firebase subscription
   useEffect(() => {
@@ -55,57 +86,89 @@ function App() {
 
   return (
     <div className={`min-h-screen transition-colors duration-1000 ${getBgClass()} flex flex-col font-sans overflow-x-hidden`}>
-      
+
       {/* Decorative Background Elements */}
       <div className="fixed inset-0 pointer-events-none opacity-30 bg-stripes z-0"></div>
       <div className="fixed -top-20 -left-20 w-64 h-64 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
       <div className="fixed top-1/2 -right-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style={{animationDelay: '1s'}}></div>
-      
-      {/* Navigation */}
-      <nav className="relative z-20 bg-white/80 backdrop-blur-md sticky top-0 border-b border-white/20 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-             <button 
-                onClick={() => setCurrentView('vote')}
-                className="flex items-center space-x-2 group focus:outline-none"
-             >
-                <span className="text-2xl group-hover:animate-bounce">👶</span>
-                <h1 className="font-heading font-bold text-xl md:text-2xl text-slate-800 tracking-tight hidden md:block">
-                  寶寶性別競猜
-                </h1>
-             </button>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-             <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl mr-2">
-                <button onClick={() => setCurrentView('vote')} className={getTabClass('vote')}>下注</button>
-                <button onClick={() => setCurrentView('dashboard')} className={getTabClass('dashboard')}>看轉播</button>
-                <button onClick={() => setCurrentView('admin')} className={getTabClass('admin')}>管理</button>
-             </div>
-             
-             {user && (
-               <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                  <img 
-                    src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} 
-                    alt="User" 
-                    className="w-8 h-8 rounded-full border border-white shadow-sm"
-                  />
-                  <button 
-                    onClick={logout}
-                    className="text-xs text-slate-400 hover:text-red-400 font-bold"
-                  >
-                    登出
-                  </button>
+
+      {/* Navigation - only in dev mode */}
+      {isDev && (
+        <nav className="relative z-20 bg-white/80 backdrop-blur-md sticky top-0 border-b border-white/20 shadow-sm">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+               <button
+                  onClick={() => navigateTo('vote')}
+                  className="flex items-center space-x-2 group focus:outline-none"
+               >
+                  <span className="text-2xl group-hover:animate-bounce">👶</span>
+                  <h1 className="font-heading font-bold text-xl md:text-2xl text-slate-800 tracking-tight hidden md:block">
+                    寶寶性別競猜
+                  </h1>
+               </button>
+            </div>
+
+            <div className="flex items-center space-x-2">
+               <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl mr-2">
+                  <button onClick={() => navigateTo('vote')} className={getTabClass('vote')}>下注</button>
+                  <button onClick={() => navigateTo('dashboard')} className={getTabClass('dashboard')}>看轉播</button>
+                  <button onClick={() => navigateTo('admin')} className={getTabClass('admin')}>管理</button>
                </div>
-             )}
+
+               {user && (
+                 <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+                    <img
+                      src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`}
+                      alt="User"
+                      className="w-8 h-8 rounded-full border border-white shadow-sm"
+                    />
+                    <button
+                      onClick={logout}
+                      className="text-xs text-slate-400 hover:text-red-400 font-bold"
+                    >
+                      登出
+                    </button>
+                 </div>
+               )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
+
+      {/* Production: minimal header with user info only */}
+      {!isDev && user && (
+        <nav className="relative z-20 bg-white/80 backdrop-blur-md sticky top-0 border-b border-white/20 shadow-sm">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <button
+              onClick={() => navigateTo('vote')}
+              className="flex items-center space-x-2 group focus:outline-none"
+            >
+              <span className="text-2xl group-hover:animate-bounce">👶</span>
+              <h1 className="font-heading font-bold text-xl md:text-2xl text-slate-800 tracking-tight hidden md:block">
+                寶寶性別競猜
+              </h1>
+            </button>
+            <div className="flex items-center gap-2">
+              <img
+                src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`}
+                alt="User"
+                className="w-8 h-8 rounded-full border border-white shadow-sm"
+              />
+              <button
+                onClick={logout}
+                className="text-xs text-slate-400 hover:text-red-400 font-bold"
+              >
+                登出
+              </button>
+            </div>
+          </div>
+        </nav>
+      )}
 
       {/* Main Content */}
       <main className="relative z-10 flex-grow p-4 md:p-8">
         <div className="max-w-2xl mx-auto w-full">
-          
+
           <div className="mb-8 text-center">
              {!gameState.isRevealed && (
                <p className="text-slate-600 font-heading text-lg animate-pulse-slow">
@@ -130,7 +193,7 @@ function App() {
       </main>
 
       <footer className="relative z-10 py-6 text-center text-slate-400 text-sm">
-        <p>© 2024 寶寶性別揭曉派對</p>
+        
       </footer>
     </div>
   );

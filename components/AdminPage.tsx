@@ -69,12 +69,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ gameState }) => {
              ) : (
                gameState.votes.map(vote => (
                  <div key={vote.id} className="flex items-center justify-between bg-slate-800 p-3 rounded-lg border border-slate-700">
-                    <div className="flex items-center gap-3">
-                       <span className="text-xl">{vote.choice === Gender.BOY ? '🧢' : '🎀'}</span>
-                       <div>
-                          <div className="font-bold text-sm">{vote.name}</div>
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                       <span className="text-xl shrink-0">{vote.choice === Gender.BOY ? '🧢' : '🎀'}</span>
+                       <div className="min-w-0 flex-1">
+                          <div className="font-bold text-sm flex items-center gap-2 flex-wrap">
+                            <span>{vote.name}</span>
+                            <span className="text-amber-400 font-mono text-xs">${(vote.amount || 0).toLocaleString()}</span>
+                          </div>
+                          {vote.email && (
+                            <div className="text-xs text-slate-400 truncate">{vote.email}</div>
+                          )}
                           {vote.userComment && (
-                            <div className="text-xs text-slate-400 truncate max-w-[150px]">{vote.userComment}</div>
+                            <div className="text-xs text-slate-500 truncate">{vote.userComment}</div>
                           )}
                        </div>
                     </div>

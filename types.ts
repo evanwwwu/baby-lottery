@@ -8,10 +8,11 @@ export interface VoteRecord {
   name: string;
   choice: Gender;
   timestamp: number;
-  aiMessage?: string;
+  amount: number;      // 下注金額
   userComment?: string;
   userId: string;     // Unique ID from Google Auth to prevent double voting
   photoURL?: string;  // User's avatar
+  email?: string;     // User's email from Google Auth
 }
 
 export interface GameState {
