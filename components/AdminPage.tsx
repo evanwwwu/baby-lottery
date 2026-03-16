@@ -1,6 +1,6 @@
 import React from 'react';
 import { GameState, Gender } from '../types';
-import { adminReset, adminReveal, adminSetLock, deleteVote } from '../services/gameService';
+import { adminReset, adminReveal, adminSetLock, adminSetAllowUndo, deleteVote } from '../services/gameService';
 
 interface AdminPageProps {
   gameState: GameState;
@@ -44,6 +44,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ gameState }) => {
               {gameState.isLocked ? '🔓 開放投票' : '🔒 鎖定投票'}
             </button>
             
+            <button
+              onClick={() => adminSetAllowUndo(!gameState.allowUndo)}
+              className={`py-3 px-4 rounded-xl font-bold transition-colors ${
+                gameState.allowUndo
+                  ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                  : 'bg-slate-600 hover:bg-slate-500 text-slate-300'
+              }`}
+            >
+              {gameState.allowUndo ? '↩️ 悔棋：開啟' : '🚫 悔棋：關閉'}
+            </button>
+
             <button
               onClick={() => {
                 if(window.confirm("確定要重置所有資料嗎？此動作無法復原。")) {

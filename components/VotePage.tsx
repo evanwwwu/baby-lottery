@@ -170,13 +170,15 @@ export const VotePage: React.FC<VotePageProps> = ({ gameState, user }) => {
           下注金額：<span className="font-bold text-amber-600">${myVote.amount?.toLocaleString() ?? 0} 元</span>
         </p>
 
-        <button
-          onClick={handleUndo}
-          disabled={isSubmitting}
-          className="w-full py-3 bg-white border-2 border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 rounded-xl font-bold transition-colors text-sm flex items-center justify-center gap-2"
-        >
-          {isSubmitting ? '處理中...' : '❌ 悔棋 (取消並重新投票)'}
-        </button>
+        {gameState.allowUndo && (
+          <button
+            onClick={handleUndo}
+            disabled={isSubmitting}
+            className="w-full py-3 bg-white border-2 border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 rounded-xl font-bold transition-colors text-sm flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? '處理中...' : '❌ 悔棋 (取消並重新投票)'}
+          </button>
+        )}
       </div>
     );
   }

@@ -165,3 +165,11 @@ export const adminSetMaxVotes = async (maxVotes: number) => {
     return { ...state, maxVotes };
   });
 };
+
+export const adminSetAllowUndo = async (allowUndo: boolean) => {
+  const gameRef = ref(db, GAME_REF_PATH);
+  await runTransaction(gameRef, (state) => {
+    if (!state) return INITIAL_STATE;
+    return { ...state, allowUndo };
+  });
+};

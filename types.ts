@@ -21,6 +21,7 @@ export interface GameState {
   winner: Gender | null;
   votes: VoteRecord[];
   maxVotes: number; // For admin control
+  allowUndo: boolean; // Whether users can undo their vote
 }
 
 export const INITIAL_STATE: GameState = {
@@ -28,5 +29,6 @@ export const INITIAL_STATE: GameState = {
   isRevealed: false,
   winner: null,
   votes: [],
-  maxVotes: 100
+  maxVotes: 100,
+  allowUndo: true
 };
