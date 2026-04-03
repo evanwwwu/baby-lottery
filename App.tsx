@@ -3,7 +3,7 @@ import { GameState, INITIAL_STATE } from './types';
 import { subscribeToGameUpdates } from './services/gameService';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { logout } from './services/authService';
+import { logout, signInWithGoogle } from './services/authService';
 import { Dashboard } from './components/Dashboard';
 import { VotePage } from './components/VotePage';
 import { AdminPage } from './components/AdminPage';
@@ -135,8 +135,8 @@ function App() {
         </nav>
       )}
 
-      {/* Production: minimal header with user info only */}
-      {!isDev && user && (
+      {/* Production: header with user info or login button */}
+      {!isDev && (
         <nav className="relative z-20 bg-white/80 backdrop-blur-md sticky top-0 border-b border-white/20 shadow-sm">
           <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <button
@@ -149,17 +149,28 @@ function App() {
               </h1>
             </button>
             <div className="flex items-center gap-2">
-              <img
-                src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`}
-                alt="User"
-                className="w-8 h-8 rounded-full border border-white shadow-sm"
-              />
-              <button
-                onClick={logout}
-                className="text-xs text-slate-400 hover:text-red-400 font-bold"
-              >
-                登出
-              </button>
+              {user ? (
+                <>
+                  <img
+                    src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`}
+                    alt="User"
+                    className="w-8 h-8 rounded-full border border-white shadow-sm"
+                  />
+                  <button
+                    onClick={logout}
+                    className="text-xs text-slate-400 hover:text-red-400 font-bold"
+                  >
+                    登出
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={signInWithGoogle}
+                  className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold rounded-lg transition-colors"
+                >
+                  Google 登入
+                </button>
+              )}
             </div>
           </div>
         </nav>
@@ -184,7 +195,7 @@ function App() {
               <>
                 {currentView === 'vote' && <VotePage gameState={gameState} user={user} />}
                 {currentView === 'dashboard' && <Dashboard gameState={gameState} />}
-                {currentView === 'admin' && <AdminPage gameState={gameState} />}
+                {currentView === 'admin' && <AdminPage gameState={gameState} user={user} />}
               </>
             )}
           </div>

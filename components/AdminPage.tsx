@@ -1,12 +1,15 @@
 import React from 'react';
+import { User } from 'firebase/auth';
 import { GameState, Gender } from '../types';
 import { adminReset, adminReveal, adminSetLock, adminSetAllowUndo, deleteVote } from '../services/gameService';
+import { signInWithGoogle } from '../services/authService';
 
 interface AdminPageProps {
   gameState: GameState;
+  user: User | null;
 }
 
-export const AdminPage: React.FC<AdminPageProps> = ({ gameState }) => {
+export const AdminPage: React.FC<AdminPageProps> = ({ gameState, user }) => {
   
   const handleReveal = (gender: Gender) => {
     // Directly call reveal without confirmation to avoid UI blocking issues
@@ -18,6 +21,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({ gameState }) => {
       deleteVote(voteId);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="bg-slate-800 text-white p-6 md:p-8 rounded-3xl shadow-xl mb-12 text-center">
+        <h2 className="text-2xl font-heading font-bold mb-4">管理員控制台</h2>
+        <p className="text-slate-400 mb-6">請先登入才能使用管理功能</p>
+        <button
+          onClick={signInWithGoogle}
+          className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl transition-colors"
+        >
+          Google 登入
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-800 text-white p-6 md:p-8 rounded-3xl shadow-xl mb-12">
